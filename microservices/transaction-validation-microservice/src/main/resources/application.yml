@@ -1,0 +1,68 @@
+server.port: 9000
+
+resilience4j.retry:
+  backends:
+    transaction-save-microservice:
+      maxRetryAttempts: 3
+      waitDuration: 1000
+      retryExceptions:
+        - org.springframework.web.reactive.function.client.WebClientResponseException$InternalServerError
+
+resilience4j.circuitbreaker:
+  backends:
+    transaction-save-microservice:
+      registerHealthIndicator: true
+      ringBufferSizeInClosedState: 5
+      failureRateThreshold: 50
+      waitInterval: 10000
+      ringBufferSizeInHalfOpenState: 3
+      automaticTransitionFromOpenToHalfOpenEnabled: true
+      ignoreExceptions:
+        - com.orange.helper.exceptions.InvalidInputException
+        - com.orange.helper.exceptions.NotFoundException
+
+app:
+  transaction-save-microservice:
+    host: localhost
+    port: 9001
+    timeoutSec: 2
+
+spring.cloud.stream:
+  defaultBinder: rabbit
+  default.contentType: application/json
+  bindings:
+    output-transactions:
+      destination: transactions
+      producer:
+        required-groups: auditGroup
+
+spring.cloud.stream.kafka.binder:
+  brokers: 127.0.0.1
+  defaultBrokerPort: 9092
+
+spring.rabbitmq:
+  host: 127.0.0.1
+  port: 5672
+  username: guest
+  password: guest
+
+logging:
+  level:
+    root: INFO
+    com.orange: DEBUG
+
+management.endpoint.health.show-details: "ALWAYS"
+management.endpoints.web.exposure.include: "*"
+---
+spring.profiles: docker
+
+server.port: 8080
+
+app:
+  transaction-save-microservice:
+    host: localhost
+    port: 8080
+
+spring.rabbitmq.host: rabbitmq
+
+spring.cloud.stream.kafka.binder.brokers: kafka

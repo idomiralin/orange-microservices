@@ -1,0 +1,64 @@
+buildscript {
+	ext {
+		springBootVersion = '2.3.2.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+group = 'com.orange.microservices.transaction.validation'
+version = '1.0.0-SNAPSHOT'
+sourceCompatibility = 1.8
+
+ext {
+	springCloudVersion = "Hoxton.RELEASE"
+	resilience4jVersion = "1.5.0"
+}
+
+repositories {
+	mavenCentral()
+	maven { url 'http://oss.jfrog.org/artifactory/oss-snapshot-local/' }
+}
+
+dependencies {
+	implementation project(':api')
+	implementation project(':helper')
+	implementation('org.springframework.boot:spring-boot-starter-actuator')
+	implementation('org.springframework.boot:spring-boot-starter-webflux')
+	implementation('org.springframework.cloud:spring-cloud-starter-stream-rabbit')
+	implementation('org.springframework.cloud:spring-cloud-starter-stream-kafka')
+	implementation('org.springframework.retry:spring-retry')
+	implementation('io.springfox:springfox-swagger2:3.0.0-SNAPSHOT')
+	implementation('io.springfox:springfox-swagger-ui:3.0.0-SNAPSHOT')
+	implementation('io.springfox:springfox-spring-webflux:3.0.0-SNAPSHOT')
+	implementation('commons-validator:commons-validator:1.6')
+	implementation("io.github.resilience4j:resilience4j-spring-boot2:${resilience4jVersion}")
+	implementation("io.github.resilience4j:resilience4j-reactor:0.14.1")
+	implementation("io.github.resilience4j:resilience4j-circuitbreaker:${resilience4jVersion}")
+
+	compile "io.github.resilience4j:resilience4j-circuitbreaker:${resilience4jVersion}"
+	compile "io.github.resilience4j:resilience4j-ratelimiter:${resilience4jVersion}"
+	compile "io.github.resilience4j:resilience4j-retry:${resilience4jVersion}"
+	compile "io.github.resilience4j:resilience4j-bulkhead:${resilience4jVersion}"
+	compile "io.github.resilience4j:resilience4j-cache:${resilience4jVersion}"
+	compile "io.github.resilience4j:resilience4j-timelimiter:${resilience4jVersion}"
+
+	testImplementation('org.springframework.boot:spring-boot-starter-test')
+	testImplementation('org.springframework.cloud:spring-cloud-stream-test-support')
+	testImplementation('io.projectreactor:reactor-test')
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
